@@ -12,85 +12,96 @@ def create_tables():
     cursor = conn.cursor()
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS account (
-            id INTEGER PRIMARY KEY,
-            balance REAL NOT NULL,
-            pin TEXT NOT NULL
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            pin TEXT NOT NULL,
+            balance REAL DEFAULT 0
         )
     """)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
             type TEXT NOT NULL,
             amount REAL NOT NULL,
             balance REAL NOT NULL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
         )
     """)
 
-    cursor.execute("SELECT COUNT(*) FROM account")
-
-    if cursor.fetchone()[0] == 0:
-        cursor.execute(
-            "INSERT INTO account (balance, pin) VALUES (?, ?)",
-            (10000, "1234")
-        )
-
     conn.commit()
     conn.close()
 
 
-def get_account():
+def create_user(name, pin, balance=10000):
     conn = connect_db()
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT balance, pin FROM account WHERE id = 1"
-    )
-
-    account = cursor.fetchone()
-
-    conn.close()
-
-    return account
-
-
-def update_balance(balance):
-    conn = connect_db()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "UPDATE account SET balance = ? WHERE id = 1",
-        (balance,)
+        "INSERT INTO users (name, pin, balance) VALUES (?, ?, ?)",
+        (name, pin, balance)
     )
 
     conn.commit()
     conn.close()
 
 
-def add_transaction(transaction_type, amount, balance):
+def login(pin):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT id, name, balance FROM users WHERE pin = ?",
+        (pin,)
+    )
+
+    user = cursor.fetchone()
+
+    conn.close()
+
+    return user
+
+
+def update_balance(user_id, balance):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE users SET balance = ? WHERE id = ?",
+        (balance, user_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def add_transaction(user_id, transaction_type, amount, balance):
     conn = connect_db()
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO transactions (type, amount, balance)
-        VALUES (?, ?, ?)
-    """, (transaction_type, amount, balance))
+        INSERT INTO transactions
+        (user_id, type, amount, balance)
+        VALUES (?, ?, ?, ?)
+    """, (user_id, transaction_type, amount, balance))
 
     conn.commit()
     conn.close()
 
 
-def get_transactions():
+def get_transactions(user_id):
     conn = connect_db()
     cursor = conn.cursor()
 
     cursor.execute("""
         SELECT type, amount, balance, timestamp
         FROM transactions
+        WHERE user_id = ?
         ORDER BY id DESC
-    """)
+    """, (user_id,))
 
     transactions = cursor.fetchall()
 
