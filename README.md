@@ -11,7 +11,7 @@ This project simulates basic ATM operations through a command-line interface.
 - 🏧 Withdraw money
 - 🔑 Change PIN
 - 🚫 Maximum 3 PIN attempts
-- ✅ Input validation
+- ✅ Input validation.   
 - 👋 Exit safely
 
 ## 🛠️ Technologies Used
