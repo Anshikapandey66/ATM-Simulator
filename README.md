@@ -16,7 +16,7 @@ This project simulates basic ATM operations through a command-line interface.
 
 ## 🛠️ Technologies Used
 
-- Python 3
+- Python 3.   
 - Loops
 - Conditional Statements
 - Functions
