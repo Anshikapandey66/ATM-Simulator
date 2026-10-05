@@ -3,7 +3,7 @@
 A simple **ATM Simulator** built using Python.  
 This project simulates basic ATM operations through a command-line interface.
       
-## ✨ Features
+## ✨ Features  
 
 - 🔐 PIN authentication
 - 💰 Check account balance
